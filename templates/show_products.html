@@ -1,0 +1,22 @@
+{% block content %}
+<div class="page-header">
+    <h1>Product list of {{ username }}</h1>
+</div>
+
+<ul>
+{% for p in products %}
+  <li>{{ p['product_name'] }} -- Item Id: <i>{{ p['product_id'] }}</i></li><br>
+{% endfor %}
+</ul>
+
+{% if not products %}
+    There are no products to show.
+{% endif %}
+
+<div>
+{% for message in get_flashed_messages() %}
+    <strong>{{ message }}</strong>
+{% endfor %}
+</div>
+
+{% endblock %}

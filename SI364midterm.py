@@ -36,8 +36,6 @@ db = SQLAlchemy(app)
 
 
 
-
-
 ##################
 ##### MODELS #####
 ##################
@@ -66,7 +64,6 @@ class Product(db.Model):
     product_name = db.Column(db.String(280))
 
     def __repr__(self):
-        return "{} (ID: {})".format(self.username, self.id)
         return '{Product ID %r} | Product Name: {%a}' %  (self.product_id, self.product_name)
 
 
@@ -97,7 +94,7 @@ class ProductForm(FlaskForm):
     submit = SubmitField()
 
 class UserForm(FlaskForm):
-    username = StringField('Please enter your username: '), validators=[Required()]
+    username = StringField('Please enter your username: ', validators=[Required()])
     submit = SubmitField()
 
 
@@ -179,6 +176,30 @@ def add_product():
             flash ('The product is successfully added')
             return redirect(url_for('add_product'))
     return render_template('add_product.html', form=form)
+
+@app.route('/get_user', methods=['GET', 'POST'])
+def get_user():
+    form = UserForm()
+    return render_template('get_user.html', form=form)
+
+@app.route('/show_products', methods=['GET', 'POST'])
+def show_products():
+    username = request.args.get('username')
+    user = User.query.filter_by(username=username).first()
+
+    if user:
+        products = Product.query.filter_by(user_id=user.id).all()
+        product_list = []
+        for p in products:
+            product_list.append({'product_name': p.product_name, 'product_id': p.product_id})
+        print(product_list)
+        return render_template('show_products.html', products=product_list, username=username)
+    else:
+        print('NO USER')
+        flash('User does not exist. Pleae re-enter')
+        return redirect(url_for('get_user'))
+
+
 
 @app.errorhandler(404)
 def page_not_found(e):
