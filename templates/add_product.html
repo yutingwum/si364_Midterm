@@ -10,4 +10,12 @@
     {{ form.submit() }}    
 </form>
 
+
+
+<div>
+{% for message in get_flashed_messages() %}
+    <strong>{{ message }}</strong>
+{% endfor %}
+</div>
+
 {% endblock %}

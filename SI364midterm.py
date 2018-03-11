@@ -88,7 +88,7 @@ class NameForm(FlaskForm):
 
 class SearchForm(FlaskForm):
     keyword = StringField("Enter the product keyword: ",validators=[Required()])
-    num_entries = IntegerField("Enter how many search entries you want (at least 1 and no more than 20): ", validators=[Required()])
+    num_entries = IntegerField("Enter how many search entries you want (at least 1 and no more than 20): ", validators=[Required(), validate_num_entries])
     submit = SubmitField()
 
 class ProductForm(FlaskForm):
@@ -96,6 +96,9 @@ class ProductForm(FlaskForm):
     product_id = IntegerField("Please enter the product id: ",validators=[Required()])
     submit = SubmitField()
 
+class UserForm(FlaskForm):
+    username = StringField('Please enter your username: '), validators=[Required()]
+    submit = SubmitField()
 
 
 #######################
@@ -162,7 +165,7 @@ def add_product():
             print('successfully added the user', user.username)
 
         product_name = wapy.product_lookup(str(product_id)).name
-        product = Product.query.filter_by(product_id=product_id, user_id=user.id, product_name=product_name).first()
+        product = Product.query.filter_by(product_id=product_id).first()
         if product:
             print('The product is in database.')
             flash('Product is already in database.')
