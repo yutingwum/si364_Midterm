@@ -10,6 +10,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, ValidationError, IntegerField # Note that you may need to import more here! Check out examples that do what you want to figure out what.
 from wtforms.validators import Required # Here, too
 from flask_sqlalchemy import SQLAlchemy
+from wapy.api import Wapy
+
+wapy = Wapy('hhfenmkbxvyb9j2bzr4ms654')
 
 ## App setup code
 app = Flask(__name__)
@@ -33,6 +36,8 @@ db = SQLAlchemy(app)
 
 
 
+
+
 ##################
 ##### MODELS #####
 ##################
@@ -45,6 +50,25 @@ class Name(db.Model):
     def __repr__(self):
         return "{} (ID: {})".format(self.name, self.id)
 
+class User(db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer,primary_key=True)
+    username = db.Column(db.String(64))
+    products = db.relationship('Product', backref='User')
+
+    def __repr__(self):
+        return '{username %r} | ID: {%a}' %  (self.username, self.id)
+
+class Product(db.Model):
+    __tablename__ = "products"
+    product_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    product_name = db.Column(db.String(280))
+
+    def __repr__(self):
+        return "{} (ID: {})".format(self.username, self.id)
+        return '{Product ID %r} | Product Name: {%a}' %  (self.product_id, self.product_name)
+
 
 
 ###################
@@ -52,16 +76,10 @@ class Name(db.Model):
 ###################
 
 def validate_num_entries(form,field):
-    if str(field.data).isdigit():
-        if int(str(field.data)) < 1 and int(str(field.data)) > 20:
-            raise ValidationError ('Number of entries can only be within 1 and 20.')
+    if field.data < 1 or field.data > 20:
+        raise ValidationError ('Number of entries can only be within 1 and 20.')
     else:
         raise ValidationError ('Your entry should be a number.')
-
-def validate_product_id(form,field):
-    if not str(field.data).isdigit():
-        raise ValidationError ('It should include only digits')
-
 
 
 class NameForm(FlaskForm):
@@ -70,12 +88,13 @@ class NameForm(FlaskForm):
 
 class SearchForm(FlaskForm):
     keyword = StringField("Enter the product keyword: ",validators=[Required()])
-    num_entries = StringField("Enter how many search entries you want (at least 1 and no more than 20): ", validators=[Required(),validate_num_entries])
+    num_entries = IntegerField("Enter how many search entries you want (at least 1 and no more than 20): ", validators=[Required()])
     submit = SubmitField()
 
-class productForm(FlaskForm):
-    product_id = StringField("Please enter the product id: ",validators=[Required(),validate_product_id])
-    submit = SubmitField
+class ProductForm(FlaskForm):
+    username = StringField('Please enter your username: ', validators=[Required()])
+    product_id = IntegerField("Please enter the product id: ",validators=[Required()])
+    submit = SubmitField()
 
 
 
@@ -95,11 +114,72 @@ def home():
     return render_template('base.html',form=form)
 
 
-
 @app.route('/names')
 def all_names():
     names = Name.query.all()
     return render_template('name_example.html',names=names)
+
+@app.route('/search')
+def search():
+    form = SearchForm()
+    return render_template('search.html',form=form)
+
+@app.route('/search_result', methods = ['GET', 'POST'])
+def search_result():
+    form = SearchForm(request.form)
+    if request.method == 'POST':
+        print('-------------------------')
+        keyword = form.keyword.data
+        print(keyword)
+        num_entries = form.num_entries.data
+        print(num_entries)
+        products = wapy.search(keyword)[0:num_entries]
+        product_list = []
+        for p in products:
+            product_list.append({'product_name': p.name, 'customer_rating': p.customer_rating, 'item_id': p.item_id, 'price': p.sale_price, 'description': p.short_description})
+        print(product_list[0])
+        return render_template('product_search_results.html', products=product_list, keyword=keyword)
+    else:
+        print('ERROR')
+        flash('All fields are required!')
+        return redirect(url_for('search'))
+
+@app.route('/add_product', methods = ['GET', 'POST'])
+def add_product():
+    form = ProductForm()
+    if request.method == 'POST':
+        username = form.username.data
+        product_id = form.product_id.data
+
+        user = User.query.filter_by(username=username).first()
+        if user:
+            print("The user is in database", user.username)
+        else:
+            print('The user is not in database yet. Adding it to database...')
+            user = User(username=username)
+            db.session.add(user)
+            db.session.commit()
+            print('successfully added the user', user.username)
+
+        product_name = wapy.product_lookup(str(product_id)).name
+        product = Product.query.filter_by(product_id=product_id, user_id=user.id, product_name=product_name).first()
+        if product:
+            print('The product is in database.')
+            flash('Product is already in database.')
+            return redirect(url_for('add_product'))
+        else:
+            print('The product is not in database. Adding it to the database...')
+            product = Product(product_id=product_id, user_id=user.id, product_name=product_name)
+            print("successfully created product")
+            db.session.add(product)
+            db.session.commit()
+            flash ('The product is successfully added')
+            return redirect(url_for('add_product'))
+    return render_template('add_product.html', form=form)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 

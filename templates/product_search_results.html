@@ -1,0 +1,21 @@
+
+
+{% block content1 %}
+
+<h1>Product Search Results for</h1>
+<h2><i>{{ keyword }}</i></h2>
+
+{% for n in products %}
+	<h4>{{ n['product_name'] }}</h4>
+	<li>Price: {{ n['price'] }}</li>
+	<li>Description: {{ n['description'] }}</li>
+	<li>Rating: {{ n['customer_rating'] }}</h3>
+	<li>Item Id: {{ n['item_id']}} </li>
+
+
+{% endfor %}
+
+<a href="{{ url_for('home')}}"> Go to home.</a>
+
+
+{% endblock %}

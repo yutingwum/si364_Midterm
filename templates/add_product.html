@@ -1,0 +1,13 @@
+{% block content1 %}
+
+<div class="page-header">
+    <h1>Add products into your wishlist...</h1>
+</div>
+
+<form method="POST">
+    {{ form.username.label() }}{{ form.username() }}<br>
+    {{ form.product_id.label() }}{{ form.product_id() }}<br>
+    {{ form.submit() }}    
+</form>
+
+{% endblock %}

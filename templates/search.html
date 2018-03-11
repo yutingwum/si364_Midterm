@@ -1,0 +1,17 @@
+
+{% block content1 %}
+
+<div class="page-header">
+    <h1>Search for the product you want...</h1>
+</div>
+
+<form method="POST", action='http://localhost:5000/search_result'>
+    {{ form.keyword.label() }}{{ form.keyword() }}<br>
+    {{ form.num_entries.label() }}{{ form.num_entries() }}<br>
+    {{ form.submit() }}    
+</form>
+
+{% endblock %}
+
+
+
