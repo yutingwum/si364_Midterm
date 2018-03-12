@@ -3,15 +3,14 @@
 {% block content1 %}
 
 <div class="page-header">
-    <h1>Add products into your wishlist...</h1>
+    <h1>Add review to a product...</h1>
 </div>
 
-<form method="POST">
-    {{ form.username.label() }}{{ form.username() }}<br>
+<form method="POST", action='http://localhost:5000/show_review'>
     {{ form.product_id.label() }}{{ form.product_id() }}<br>
+    {{ form.review.label() }}{{ form.review() }}<br>
     {{ form.submit() }}    
 </form>
-
 
 <div>
 {% for message in get_flashed_messages() %}
@@ -20,6 +19,5 @@
 </div>
 
 <li><a href="{{ url_for('home')}}">Go to home</a></li>
-<li><a href="{{ url_for('get_user')}}">See products in your list</a></li>
 
 {% endblock %}

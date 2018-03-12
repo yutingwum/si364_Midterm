@@ -1,0 +1,13 @@
+{% block content1 %}
+
+<h1>All reviews</h1>
+
+{% for r in reviews %}
+	<h4>{{ r.product_name }}</h4>
+	<li>Review: {{ r.review }}</li>
+
+{% endfor %}
+
+
+
+{% endblock %}

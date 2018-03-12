@@ -34,8 +34,6 @@ db = SQLAlchemy(app)
 ######################################
 
 
-
-
 ##################
 ##### MODELS #####
 ##################
@@ -66,6 +64,17 @@ class Product(db.Model):
     def __repr__(self):
         return '{Product ID %r} | Product Name: {%a}' %  (self.product_id, self.product_name)
 
+class Review(db.Model):
+    __tablename__ = "reviews"
+    id = db.Column(db.Integer,primary_key=True)
+    product_id = db.Column(db.Integer)
+    #username = db.Column(db.Integer, db.ForeignKey('users.username'))
+    product_name = db.Column(db.String(280))
+    review = db.Column(db.String)
+
+    def __repr__(self):
+        return '{Product Name %r} | Review: {%a}' %  (self.product_name, self.review)
+
 
 
 ###################
@@ -95,6 +104,11 @@ class ProductForm(FlaskForm):
 
 class UserForm(FlaskForm):
     username = StringField('Please enter your username: ', validators=[Required()])
+    submit = SubmitField()
+
+class ReviewForm(FlaskForm):
+    product_id = IntegerField('Enter the item id of the product that you would like to review', validators=[Required()])
+    review = StringField('Please enter your review:', validators=[Required()])
     submit = SubmitField()
 
 
@@ -199,6 +213,42 @@ def show_products():
         flash('User does not exist. Pleae re-enter')
         return redirect(url_for('get_user'))
 
+@app.route('/add_review', methods=['GET', 'POST'])
+def add_review():
+    form = ReviewForm()
+    return render_template('add_review.html', form=form)
+
+@app.route('/show_review', methods=['GET', 'POST'])
+def show_revew():
+    form = ReviewForm(request.form)
+    product_id = form.product_id.data
+    print(product_id)
+    review = form.review.data
+    print(review)
+
+    product_review = Review.query.filter_by(product_id=product_id, review=review).first()
+    if product_review:
+        flash('Review for the product already exist')
+        return redirect(url_for('add_review'))
+
+    try:
+        print("New product review")
+        product_name = wapy.product_lookup(str(product_id)).name
+        print(product_name)
+        product_review = Review(product_id=product_id, product_name=product_name, review=review)
+        db.session.add(product_review)
+        db.session.commit()
+        print('successfully added the review for ', product_review.review)
+        return render_template('show_review.html',product_name=product_name, review=review)
+    except:
+        flash("Product Id does not exist. Try something else!")
+        return redirect(url_for('add_review'))
+
+
+@app.route('/show_all_reviews')
+def show_all_reviews():
+    reviews = Review.query.all()
+    return render_template('show_all_reviews.html', reviews=reviews)
 
 
 @app.errorhandler(404)

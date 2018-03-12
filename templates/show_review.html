@@ -1,0 +1,13 @@
+{% block content1 %}
+
+<div class="page-header">
+    <h3>Successfully added review for product <br>{{ product_name}} </h3>
+    <h5><i>Review content: </i></h5><br>
+    <strong><i>{{review}}</i></strong>
+</div>
+
+
+<li><a href="{{ url_for('home')}}">Go to home</a></li>
+<li><a href="{{ url_for('add_review')}}">Add more reviews</a></li>
+
+{% endblock %}

@@ -18,6 +18,7 @@
 - Name (id, name)
 - User (id, username, and has a one-to-many relationship with Product)
 - Prdocut (product_id, user_id, product_name)
+- Review (product_id, product_name, review)
 
 ## Templates
 - 404.html
@@ -28,6 +29,9 @@
 - add_product.html (for add_product)
 - get_user.html (for get_user)
 - show_products.html (for show_products)
+- add_review.html (for add_review)
+- show_review.html (for show_review)
+- show_all_reviews.html (for show_all_reviews)
 
 
 
@@ -43,3 +47,8 @@
 - Have a one:many relationship that works properly built between 2 of your models. ((User - Product))
 - Successfully query data from each of your models (so query at least one column, or all data, from every database table you have a model for). (show_products function)
 - Query data using an .all() method in at least one view function and send the results of that query to a template. (show_products function, show_products.html) 
+
+### Aditional requirements
+- Include an additional model class (to make at least 4 total in the application) with at least 3 columns. Save data to it AND query data from it; use the data you query in a view-function, and as a result of querying that data, something should show up in a view. (The data itself should show up, OR the result of a request made with the data should show up. (add_review, show_review, show_all_reviews)
+
+- Write code in your Python file that will allow a user to submit duplicate data to a form, but will not save duplicate data (In add_product function, the user is NOT able to enter the same username and some product if it is already in database.)
